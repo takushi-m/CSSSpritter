@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import Image
+import argparse
 
 def isImg(file):
 	return re.search("(\.jpg|\.gif|\.png)",file)
@@ -9,34 +10,38 @@ def isImg(file):
 def getClass(file):
 	return file[0:re.search("(\.jpg|\.gif|\.png)",file).start()]
 
-dir = "./"
-argv = sys.argv
-argc = len(argv)
+parser = argparse.ArgumentParser(description="generate css sprite image and css.")
+args = parser.add_argument("-d","--dir",default="./")
+args = parser.parse_args()
 
-if argc == 2:
-	dir = argv[1]
-	if not re.search("/$",dir):
-		dir += "/"
+d = args.dir
+if not re.search("/$",d):
+	d += "/"
 
-files = os.listdir(dir);
+files = os.listdir(d);
 
 dx = 0
 dy = 0
+cnt = 0
 
 for file in files:
 	if isImg(file):
-		img = Image.open(dir+file)
+		cnt += 1
+		img = Image.open(d+file)
 		dy += img.size[1]
 		if img.size[0] > dx:
 			dx = img.size[0]
 			
+if cnt == 0:
+	sys.exit()
+
 canvas = Image.new("RGB", (dx,dy), (255,255,255))
 
 cy = 0
 css_text = ""
 for file in files:
 	if isImg(file):
-		img = Image.open(dir+file)
+		img = Image.open(d+file)
 		
 		size = img.size
 		css_text += """
